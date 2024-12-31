@@ -14,6 +14,8 @@ import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_E;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_F;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_G;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_I;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_KP_2;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_KP_4;
@@ -131,7 +133,6 @@ import static org.lwjgl.opengl.GL40.GL_PATCH_VERTICES;
 import static org.lwjgl.opengl.GL40.GL_TESS_CONTROL_SHADER;
 import static org.lwjgl.opengl.GL40.GL_TESS_EVALUATION_SHADER;
 import static org.lwjgl.opengl.GL40.glPatchParameteri;
-
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
 import static org.lwjgl.system.MemoryStack.stackPush;
@@ -234,6 +235,8 @@ public class App {
 
     private int _earthRows = 100;
     private int _earthCols = 100;
+
+    private int _levelOfTessellation = 3;
 
     public void run() {
         init();
@@ -406,7 +409,7 @@ public class App {
             _camera.processInputs(_window, deltaTime);
 
             float earthAngle = currentFrameTime * 2;
-             _earth.rotate(0.1f, 0, 1, 0);
+            _earth.rotate(0.1f, 0, 1, 0);
 
             // reflector light animace
             if (_rotatingLight) {
@@ -541,6 +544,9 @@ public class App {
     }
 
     private void drawMesh(Mesh mesh, int shaderProgramID, int texture, boolean triangleStrip) {
+
+        // Nastavení tessellace
+        glUniform1i(glGetUniformLocation(shaderProgramID, "levelOfTessellation"), _levelOfTessellation);
 
         // Poslání textury do shaderu
 
@@ -685,12 +691,20 @@ public class App {
                     remakeEarth();
                 }
                 if (key == GLFW_KEY_X && action == GLFW_PRESS) {
-                    changeShaderMode(-1);
-                }
-                if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
                     changeShaderMode(+1);
                 }
-                if (key == GLFW_KEY_LEFT && action == GLFW_PRESS) {
+                if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
+                    changeShaderMode(-1);
+                }
+                if (key == GLFW_KEY_F && action == GLFW_PRESS) {
+                    _levelOfTessellation += 1;
+                }
+                if (key == GLFW_KEY_G && action == GLFW_PRESS) {
+                    _levelOfTessellation -= 1;
+                } else {
+                }
+                if (key != GLFW_KEY_LEFT || action != GLFW_PRESS) {
+                } else {
                     _light.translate(-5, 0, 0);
                     _light2.translate(-5, 0, 0);
                 }

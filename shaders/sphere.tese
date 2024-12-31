@@ -1,102 +1,68 @@
-// #version 330 core
-
-// layout(triangles) in; // Vstupní primitiva: trojúhelníky
-// layout(triangle_strip, max_vertices = 64) out; // Výstupní primitiva: trojúhelníkový pás
-
-// in vec3 fragColor[]; // Barvy z vertex shaderu
-// in vec3 fragPosition[]; 
-// in vec3 fragNormal[];
-// in vec2 fragTexCoords[];
-// in vec4 fragLightSpacePos[];
-
-// out vec3 gColor; 
-// out vec3 gPosition;
-// out vec3 gNormal;
-// out vec2 gTexCoords;
-// out vec4 gLightSpacePos;
-
-// uniform int tessellationLevel = 1; // Úroveň teselace
-
-// // Barycentrická interpolace mezi třemi body
-// vec3 barycentricInterpolate(vec3 v0, vec3 v1, vec3 v2, float u, float v, float w) {
-//     return v0 * u + v1 * v + v2 * w;
-// }
-
-// vec2 barycentricInterpolate(vec2 v0, vec2 v1, vec2 v2, float u, float v, float w) {
-//     return v0 * u + v1 * v + v2 * w;
-// }
-
-// vec4 barycentricInterpolate(vec4 v0, vec4 v1, vec4 v2, float u, float v, float w) {
-//     return v0 * u + v1 * v + v2 * w;
-// }
-
-// void main() {
-//     for (int i = 0; i < 30; ++i) {
-//         gl_Position = gl_in[i].gl_Position;
-//         gColor = fragColor[0]; // Pevná barva z prvního vrcholu
-//         EmitVertex();
-//         gTexCoords = fragTexCoords;
-//     }
-//     EndPrimitive();
-// }
-
-
 #version 460 core
 
-// // Quads
-// layout (quads, equal_spacing , ccw) in;
+layout(triangles, equal_spacing, ccw) in;
 
-// in vec2 uvsCoord[];
-// out vec2 uvs;
+in vec2 tessellationUV_out[];  // UV přijaté z tesc shaderu
+in vec3 vertexColor_out[];     // Barva přijatá z tesc shaderu
 
-// void main()
-// {
-//     float u = gl_TessCoord.x;
-//     float v = gl_TessCoord.y;
+out vec3 fragColor;       // Výstupní barva
+out vec3 fragPosition;    // Výstupní pozice
+out vec3 fragNormal;      // Výstupní normála
+out vec2 fragTexCoords;   // Výstupní texturové souřadnice
 
-//     vec2 uv0 = uvsCoord[0];
-//     vec2 uv1 = uvsCoord[1];
-//     vec2 uv2 = uvsCoord[2];
-//     vec2 uv3 = uvsCoord[3];
+uniform mat4 camMatrix;        // Kamera
+uniform mat4 modelMatrix;      // Modelová matice
+uniform mat4 lightSpaceMatrix; // Matice pro stíny
+uniform bool depthRendering;   // Stínový rendering
 
-//     vec2 leftUV = uv0 + v * (uv3 - uv0);
-//     vec2 rightUV = uv1 + v * (uv2 - uv1);
-//     vec2 texCoord = leftUV + u * (rightUV - leftUV);
+// Výpočet pozice na kouli
+vec3 calculatePos(float u, float v) {
+    float r = 3.0; // Poloměr koule
 
-//     vec4 pos0 = gl_in[0].gl_Position;
-//     vec4 pos1 = gl_in[1].gl_Position;
-//     vec4 pos2 = gl_in[2].gl_Position;
-//     vec4 pos3 = gl_in[3].gl_Position;
+    // Úhly
+    float angle1 = u * 4.0 * 3.1415926; // Azimutální úhel
+    float angle2 = v * 3.1415926;       // Zenitální úhel
 
-//     vec4 leftPos = pos0 + v * (pos3 - pos0);
-//     vec4 rightPos = pos1 + v * (pos2 - pos1);
-//     vec4 pos = leftPos + u * (rightPos - leftPos);
+    // Výpočet pozice vrcholu
+    float x = r * sin(angle2) * cos(angle1);
+    float z = r * sin(angle2) * sin(angle1);
+    float y = r * cos(angle2);
 
-//     gl_Position = pos; // Matrix transformations go here
-//     uvs = texCoord;
-// }
+    vec3 transformedPosition = vec3(x, y, z);
+    return (modelMatrix * vec4(transformedPosition, 1.0)).xyz;
+}
 
-//Triangles
-layout (triangles, equal_spacing , ccw) in;
+void main() {
+    // Barycentrické souřadnice
+    float u = gl_TessCoord.x;
+    float v = gl_TessCoord.y;
+    float w = gl_TessCoord.z;
 
-in vec2 uvsCoord[];
-out vec2 uvs;
+    // Interpolace UV souřadnic
+    vec2 texCoord = u * tessellationUV_out[0] + v * tessellationUV_out[1] + w * tessellationUV_out[2];
+    vec3 interpolatedColor = u * vertexColor_out[0] + v * vertexColor_out[1] + w * vertexColor_out[2];
 
-void main()
-{
-   // barycentric coordinates
-   float u = gl_TessCoord.x;
-   float v = gl_TessCoord.y;
-   float w = gl_TessCoord.z;
-   // barycentric interpolation
-   vec2 texCoord = u * uvsCoord[0] + v * uvsCoord[1] + w * uvsCoord[2];
+    // Výpočet pozice vrcholu na kouli
+    vec3 finalPosition = calculatePos(texCoord.x, texCoord.y);
 
-   vec4 pos0 = gl_in[0].gl_Position;
-   vec4 pos1 = gl_in[1].gl_Position;
-   vec4 pos2 = gl_in[2].gl_Position;
-   // barycentric interpolation
-   vec4 pos = u * pos0 + v * pos1 + w * pos2;
+    // Výpočet normály
+    float smallvalue = 0.01; // Malý posun pro derivace
+    vec3 neighbour1 = calculatePos(texCoord.x + smallvalue, texCoord.y);
+    vec3 neighbour2 = calculatePos(texCoord.x, texCoord.y + smallvalue);
+    vec3 tangent = neighbour1 - finalPosition;
+    vec3 bitangent = neighbour2 - finalPosition;
+    vec3 displacedNormal = normalize(cross(tangent, bitangent));
 
-   gl_Position = pos;
-   uvs = texCoord;
+    // Výstupní pozice pro stíny nebo kameru
+    if (depthRendering) {
+        gl_Position = lightSpaceMatrix * vec4(finalPosition, 1.0);
+    } else {
+        gl_Position = camMatrix * vec4(finalPosition, 1.0);
+    }
+
+    // Předání hodnot fragment shaderu
+    fragColor = interpolatedColor;
+    fragPosition = finalPosition;
+    fragNormal = displacedNormal;
+    fragTexCoords = vec2(-texCoord.x*2, texCoord.y); ;
 }
