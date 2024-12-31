@@ -6,9 +6,13 @@ import java.util.Map;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import static org.lwjgl.opengl.GL11.GL_FRONT_AND_BACK;
+import static org.lwjgl.opengl.GL11.GL_LINE;
 import static org.lwjgl.opengl.GL11.GL_UNSIGNED_INT;
 import static org.lwjgl.opengl.GL11.glDrawElements;
+import static org.lwjgl.opengl.GL11.glPolygonMode;
 import org.lwjgl.opengl.GL20;
+import static org.lwjgl.opengl.GL40.GL_PATCHES;
 
 import com.example.IBO;
 import com.example.VBO;
@@ -50,7 +54,16 @@ public abstract class Mesh {
         _modelMatrix.get(matrixData); // Získáme hodnoty matice jako pole
         GL20.glUniformMatrix4fv(_uniformModelMatrixLocations.get(shaderProgramID), false, matrixData);
 
-        glDrawElements(drawMode, _indices.length, GL_UNSIGNED_INT, 0);
+        // wireframe
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        // glDisable(GL_CULL_FACE);
+
+        // fill
+        // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        // //glEnable(GL_CULL_FACE);
+
+        // glDrawElements(drawMode, _indices.length, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_PATCHES, _indices.length, GL_UNSIGNED_INT, 0);
     }
 
     // translation

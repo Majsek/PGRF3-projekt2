@@ -127,6 +127,11 @@ import static org.lwjgl.opengl.GL20.glUniform1i;
 import static org.lwjgl.opengl.GL20.glUniform3f;
 import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
 import static org.lwjgl.opengl.GL20.glUseProgram;
+import static org.lwjgl.opengl.GL40.GL_PATCH_VERTICES;
+import static org.lwjgl.opengl.GL40.GL_TESS_CONTROL_SHADER;
+import static org.lwjgl.opengl.GL40.GL_TESS_EVALUATION_SHADER;
+import static org.lwjgl.opengl.GL40.glPatchParameteri;
+
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
 import static org.lwjgl.system.MemoryStack.stackPush;
@@ -332,13 +337,13 @@ public class App {
             _shaderProgramDefault = createShaderProgram("default");
             _shaderProgramSkybox = createShaderProgram("skybox");
 
-            _shaderProgramsEarth.add(createShaderProgram("earth", "default"));
-            _shaderProgramsEarth.add(createShaderProgram("earth", "_xyzColor"));
-            _shaderProgramsEarth.add(createShaderProgram("earth", "_normalView"));
-            _shaderProgramsEarth.add(createShaderProgram("earth", "_depthView"));
-            _shaderProgramsEarth.add(createShaderProgram("earth", "_orthoLight"));
-            _shaderProgramsEarth.add(createShaderProgram("earth", "_pointLight"));
-            _shaderProgramsEarth.add(createShaderProgram("earth", "_reflectorLight"));
+            _shaderProgramsEarth.add(createShaderProgram("earth", "sphere", "default"));
+            _shaderProgramsEarth.add(createShaderProgram("earth", "sphere", "_xyzColor"));
+            _shaderProgramsEarth.add(createShaderProgram("earth", "sphere", "_normalView"));
+            _shaderProgramsEarth.add(createShaderProgram("earth", "sphere", "_depthView"));
+            _shaderProgramsEarth.add(createShaderProgram("earth", "sphere", "_orthoLight"));
+            _shaderProgramsEarth.add(createShaderProgram("earth", "sphere", "_pointLight"));
+            _shaderProgramsEarth.add(createShaderProgram("earth", "sphere", "_reflectorLight"));
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -375,6 +380,9 @@ public class App {
         _earth.scale(5f, 5f, 5f);
 
         _textureEarth = loadTexture("earth.jpg");
+
+        // glPatchParameteri(GL_PATCH_VERTICES, 4); // Quads
+        glPatchParameteri(GL_PATCH_VERTICES, 3); // Triangles
     }
 
     // Hlavní smyčka
@@ -398,7 +406,7 @@ public class App {
             _camera.processInputs(_window, deltaTime);
 
             float earthAngle = currentFrameTime * 2;
-            _earth.rotate(0.1f, 0, 1, 0);
+             _earth.rotate(0.1f, 0, 1, 0);
 
             // reflector light animace
             if (_rotatingLight) {
@@ -468,12 +476,12 @@ public class App {
         }
 
         // ----------------------------- SKYBOX -----------------------------
-        glUseProgram(_shaderProgramSkybox);
-        glUniform1f(_timeSkyboxUniformLocation, currentFrameTime);
-        // Nastavení kamery - předání matic do shaderu
-        _camera.setCameraViewAndProjectionIntoShader(_shaderProgramSkybox);
-        // Vykreslení objektu
-        _skybox.draw(GL_TRIANGLES, _shaderProgramSkybox);
+        // glUseProgram(_shaderProgramSkybox);
+        // glUniform1f(_timeSkyboxUniformLocation, currentFrameTime);
+        // // Nastavení kamery - předání matic do shaderu
+        // _camera.setCameraViewAndProjectionIntoShader(_shaderProgramSkybox);
+        // // Vykreslení objektu
+        // _skybox.draw(GL_TRIANGLES, _shaderProgramSkybox);
 
         // ----------------------------- EARTH -----------------------------
         glUseProgram(_shaderProgramsEarth.get(currentShaderID));
@@ -665,7 +673,8 @@ public class App {
                     _rotatingLight = !_rotatingLight;
                 }
                 if (key == GLFW_KEY_Q && action == GLFW_PRESS) {
-                    //takhle je to tady přes procesor, tohle pak musím posílat do toho Geometry Shaderu a udělat to nějak přes něj
+                    // takhle je to tady přes procesor, tohle pak musím posílat do toho Geometry
+                    // Shaderu a udělat to nějak přes něj
                     _earthRows *= 0.5f;
                     _earthCols *= 0.5f;
                     remakeEarth();
@@ -744,23 +753,42 @@ public class App {
     }
 
     // Vytvoří a vrátí shader program z shader souborů
-    private int createShaderProgram(String vertShaderName, String fragShaderName) throws IOException {
+    private int createShaderProgram(String vertShaderName, String tessellationShaderName, String fragShaderName)
+            throws IOException {
         int vertexShader = loadShaderFromPath("shaders/" + vertShaderName + ".vert", GL_VERTEX_SHADER);
+        int tesselationShaderTesc = tessellationShaderName != null
+                ? loadShaderFromPath("shaders/" + tessellationShaderName + ".tesc", GL_TESS_CONTROL_SHADER)
+                : 0;
+        int tesselationShaderTese = tessellationShaderName != null
+                ? loadShaderFromPath("shaders/" + tessellationShaderName + ".tese", GL_TESS_EVALUATION_SHADER)
+                : 0;
         int fragmentShader = loadShaderFromPath("shaders/" + fragShaderName + ".frag", GL_FRAGMENT_SHADER);
 
         int shaderProgram = glCreateProgram();
         glAttachShader(shaderProgram, vertexShader);
+        if (tessellationShaderName != null) {
+            glAttachShader(shaderProgram, tesselationShaderTesc);
+            glAttachShader(shaderProgram, tesselationShaderTese);
+        }
         glAttachShader(shaderProgram, fragmentShader);
         glLinkProgram(shaderProgram);
 
         glDeleteShader(vertexShader);
+        if (tessellationShaderName != null) {
+            glDeleteShader(tesselationShaderTesc);
+            glDeleteShader(tesselationShaderTese);
+        }
         glDeleteShader(fragmentShader);
 
         return shaderProgram;
     }
 
     private int createShaderProgram(String shaderName) throws IOException {
-        return createShaderProgram(shaderName, shaderName);
+        return createShaderProgram(shaderName, null, shaderName);
+    }
+
+    private int createShaderProgram(String vertShaderName, String fragShaderName) throws IOException {
+        return createShaderProgram(vertShaderName, null, fragShaderName);
     }
 
     // Načtení shaderu ze souboru
