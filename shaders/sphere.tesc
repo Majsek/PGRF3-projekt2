@@ -10,17 +10,22 @@ out vec3 vertexColor_out[];     // Posíláme dál
 
 uniform int levelOfTessellation;   // Úroveň tessellace
 uniform vec3 viewPos;
+uniform mat4 modelMatrix;
 
 void main() {
+    // Pozice objektu ve světě
+    vec3 objectOffset = vec3(modelMatrix[3][0], modelMatrix[3][1], modelMatrix[3][2]);
+
 // Pozice primitiva (průměrná pozice vrcholů trojúhelníku)
-    vec3 primitiveCenter = (gl_in[0].gl_Position.xyz + gl_in[1].gl_Position.xyz + gl_in[2].gl_Position.xyz) / 3.0;
+    vec3 primitiveCenter = (gl_in[0].gl_Position.xyz + gl_in[1].gl_Position.xyz + gl_in[2].gl_Position.xyz) / 3.0 + objectOffset;
 
 // Vzdálenosti mezi kamerou a středem primitiva
     float distance = length(viewPos - primitiveCenter);
 
-    int maxTessellationLevel = 7; // Maximální úroveň tessellace
+    int maxTessellationLevel = 12; // Maximální úroveň tessellace
     int minTessellationLevel = 1; // Minimální úroveň tessellace
-    float LODDistance = 50.0;     // Vzdálenost, při které začíná tessellace klesat
+    // float LODDistance = 30.0;     // Vzdálenost, při které začíná tessellace klesat
+    float LODDistance = 10.0;     // Vzdálenost, při které začíná tessellace klesat
 
     int finalLevelOfTessellation;
 

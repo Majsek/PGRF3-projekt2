@@ -379,7 +379,7 @@ public class App {
 
         // _earth = new TriangleGrid(1, 2, 300, 300, _shaderProgramsEarth);
         _earth = new TriangleGrid(1, 2, 5, 5, _shaderProgramsEarth);
-        // _earth.translate(0f, 30f, -35f);
+        _earth.translate(0f, 30f, -35f);
         _earth.scale(5f, 5f, 5f);
 
         _textureEarth = loadTexture("earth.jpg");
