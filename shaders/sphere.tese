@@ -64,5 +64,5 @@ void main() {
     fragColor = interpolatedColor;
     fragPosition = finalPosition;
     fragNormal = displacedNormal;
-    fragTexCoords = vec2(-texCoord.x*2, texCoord.y); ;
+    fragTexCoords = vec2(-texCoord.x*2, texCoord.y);
 }
