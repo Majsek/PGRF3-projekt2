@@ -25,7 +25,7 @@ void main() {
     int maxTessellationLevel = 12; // Maximální úroveň tessellace
     int minTessellationLevel = 1; // Minimální úroveň tessellace
     // float LODDistance = 30.0;     // Vzdálenost, při které začíná tessellace klesat
-    float LODDistance = 10.0;     // Vzdálenost, při které začíná tessellace klesat
+    float LODDistance = 50.0;     // Vzdálenost, při které začíná tessellace klesat
 
     int finalLevelOfTessellation;
 

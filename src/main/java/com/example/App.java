@@ -148,23 +148,8 @@ public class App {
     // SHADER PROGRAMS
     private int _shaderProgramDefault;
     private int _shaderProgramSkybox;
-    private final ArrayList<Integer> _shaderProgramsFloor = new ArrayList<>();
 
-    // Default
-    private final ArrayList<Integer> _shaderProgramsDefault = new ArrayList<>();
-
-    // Kartézské
-    private final ArrayList<Integer> _shaderProgramsWaveAnimation = new ArrayList<>();
-    private final ArrayList<Integer> _shaderProgramsPlaneWave = new ArrayList<>();
-
-    // Sférické
-    private final ArrayList<Integer> _shaderProgramsTorus = new ArrayList<>();
-    private final ArrayList<Integer> _shaderProgramsSphericalRandom = new ArrayList<>();
     private final ArrayList<Integer> _shaderProgramsEarth = new ArrayList<>();
-
-    // Cylindrické
-    private final ArrayList<Integer> _shaderProgramsCylindrical1 = new ArrayList<>();
-    private final ArrayList<Integer> _shaderProgramsCylindrical2 = new ArrayList<>();
 
     // Kamera
     private Camera _camera;
@@ -172,27 +157,22 @@ public class App {
     // Objects
     private final ArrayList<Mesh> _objects = new ArrayList<>();
     private final ArrayList<Mesh> _triangleStripObjects = new ArrayList<>();
-    private final ArrayList<Mesh> _waveAnimationObjects = new ArrayList<>();
     private final ArrayList<Mesh> _planeWaveObjects = new ArrayList<>();
 
-    private Mesh _skybox;
     private Mesh _light;
     private Mesh _light2;
-    private Mesh _floor;
 
-    // Kartézské
-    private Mesh _waveAnimation;
-    private Mesh _planeWave;
-
-    // Sférické
-    private Mesh _torus;
-    private Mesh _sphericalRandom;
+    // Planets
+    private Mesh _mercury;
+    private Mesh _venus;
     private Mesh _earth;
-    private Mesh _stars;
+    private Mesh _mars;
+    private Mesh _jupiter;
+    private Mesh _saturn;
+    private Mesh _uranus;
+    private Mesh _neptune;
 
-    // Cylindrické
-    private Mesh _cylindrical1;
-    private Mesh _cylindrical2;
+    private Mesh _stars;
 
     // Draw modes
     private boolean _drawTriangles = true;
@@ -205,7 +185,6 @@ public class App {
 
     private Vector3f _lightDir = new Vector3f(0.0f, -1.0f, 0.0f);
     private float _cutOff = 0.8f;
-    private float _speed = 0.01f;
 
     // UNIFORMS
     // default
@@ -230,7 +209,14 @@ public class App {
 
     private int _shadowResolution = 1024 * 10;
 
+    private int _textureMercury;
+    private int _textureVenus;
     private int _textureEarth;
+    private int _textureMars;
+    private int _textureJupiter;
+    private int _textureSaturn;
+    private int _textureUranus;
+    private int _textureNeptune;
     private int _textureStars;
 
     private boolean _restart = false;
@@ -376,15 +362,55 @@ public class App {
         _light.translate(-10f, 200f, 100f);
         _light.rotate(10f, 0f, 1f, 0f);
 
-        _skybox = new Cube(100f, new ArrayList<>(List.of(_shaderProgramSkybox)));
+        // ============================== PLANETS ==============================
 
-        // _earth = new TriangleGrid(1, 2, 300, 300, _shaderProgramsEarth);
-        _earth = new TriangleGrid(1, 2, 5, 5, _shaderProgramsEarth);
-        _earth.translate(0f, 30f, -35f);
-        _earth.scale(5f, 5f, 5f);
+        float step = 50f;
+        int rows = 4, cols = 4;
+
+        _mercury = new TriangleGrid(1, 2, rows, cols, _shaderProgramsEarth);
+        _mercury.translate(-step * 4f, 0f, -35f);
+        _mercury.scale(0.38f, 0.38f, 0.38f);
+        
+        _venus = new TriangleGrid(1, 2, rows, cols, _shaderProgramsEarth);
+        _venus.translate(-step * 3f, 0f, -35f);
+        _venus.scale(0.95f, 0.95f, 0.95f);
+
+        _earth = new TriangleGrid(1, 2, rows, cols, _shaderProgramsEarth);
+        _earth.translate(-step * 2f, 0f, -35f);
+        _earth.scale(1f, 1f, 1f);
+
+        _mars = new TriangleGrid(1, 2, rows, cols, _shaderProgramsEarth);
+        _mars.translate(-step * 1f, 0f, -35f);
+        _mars.scale(0.53f, 0.53f, 0.53f);
+
+        _jupiter = new TriangleGrid(1, 2, rows, cols, _shaderProgramsEarth);
+        _jupiter.translate(0f, 0f, -35f);
+        _jupiter.scale(11.21f, 11.21f, 11.21f);
+
+        _saturn = new TriangleGrid(1, 2, rows, cols, _shaderProgramsEarth);
+        _saturn.translate(step * 1f, 0f, -35f);
+        _saturn.scale(9.45f, 9.45f, 9.45f);
+
+        _uranus = new TriangleGrid(1, 2, rows, cols, _shaderProgramsEarth);
+        _uranus.translate(step * 2f, 0f, -35f);
+        _uranus.scale(4.08f, 4.08f, 4.08f);
+
+        _neptune = new TriangleGrid(1, 2, rows, cols, _shaderProgramsEarth);
+        _neptune.translate(step * 3f, 0f, -35f);
+        _neptune.scale(3.88f, 3.88f, 3.88f);
+
+
         _stars = new TriangleGrid(1, 2, 5, 5, _shaderProgramsEarth);
-        _stars.scale(50f, 50f, 50f);
+        _stars.scale(200f, 200f, 200f);
+        _textureMercury = loadTexture("mercury.jpg");
+        _textureVenus = loadTexture("venus.jpg");
         _textureEarth = loadTexture("earth.jpg");
+        _textureMars = loadTexture("mars.jpg");
+        _textureJupiter = loadTexture("jupiter.jpg");
+        _textureSaturn = loadTexture("saturn.jpg");
+        _textureUranus = loadTexture("uranus.jpg");
+        _textureNeptune = loadTexture("neptune.jpg");
+
         _textureStars = loadTexture("stars.jpg");
 
         // glPatchParameteri(GL_PATCH_VERTICES, 4); // Quads
@@ -413,7 +439,14 @@ public class App {
             _stars.setTranslation(_camera.getPosition());
 
             float earthAngle = currentFrameTime * 2;
+            _mercury.rotate(0.1f, 0, 1, 0);
+            _venus.rotate(0.1f, 0, 1, 0);
             _earth.rotate(0.1f, 0, 1, 0);
+            _mars.rotate(0.1f, 0, 1, 0);
+            _jupiter.rotate(0.1f, 0, 1, 0);
+            _saturn.rotate(0.1f, 0, 1, 0);
+            _uranus.rotate(0.1f, 0, 1, 0);
+            _neptune.rotate(0.1f, 0, 1, 0);
 
             // reflector light animace
             if (_rotatingLight) {
@@ -482,14 +515,6 @@ public class App {
             _light.draw(GL_TRIANGLES, _shaderProgramDefault);
         }
 
-        // ----------------------------- SKYBOX -----------------------------
-        // glUseProgram(_shaderProgramSkybox);
-        // glUniform1f(_timeSkyboxUniformLocation, currentFrameTime);
-        // // Nastavení kamery - předání matic do shaderu
-        // _camera.setCameraViewAndProjectionIntoShader(_shaderProgramSkybox);
-        // // Vykreslení objektu
-        // _skybox.draw(GL_TRIANGLES, _shaderProgramSkybox);
-
         // ----------------------------- EARTH -----------------------------
         glUseProgram(_shaderProgramsEarth.get(currentShaderID));
         // Pošle uniformy do aktivního shaderu
@@ -500,7 +525,17 @@ public class App {
         _camera.setCameraMatrixIntoShader(_shaderProgramsEarth.get(currentShaderID));
 
         // Vykreslení objektu
+        
+        drawMesh(_mercury, _shaderProgramsEarth.get(currentShaderID), _textureMercury);
+        drawMesh(_venus, _shaderProgramsEarth.get(currentShaderID), _textureVenus);
         drawMesh(_earth, _shaderProgramsEarth.get(currentShaderID), _textureEarth);
+        drawMesh(_mars, _shaderProgramsEarth.get(currentShaderID), _textureMars);
+        drawMesh(_jupiter, _shaderProgramsEarth.get(currentShaderID), _textureJupiter);
+        drawMesh(_saturn, _shaderProgramsEarth.get(currentShaderID), _textureSaturn);
+        drawMesh(_uranus, _shaderProgramsEarth.get(currentShaderID), _textureUranus);
+        drawMesh(_neptune, _shaderProgramsEarth.get(currentShaderID), _textureNeptune);
+
+
         _camera.setCameraViewAndProjectionIntoShader(_shaderProgramsEarth.get(currentShaderID));
         drawMesh(_stars, _shaderProgramsEarth.get(currentShaderID), _textureStars);
     }
