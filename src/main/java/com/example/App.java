@@ -188,6 +188,7 @@ public class App {
     private Mesh _torus;
     private Mesh _sphericalRandom;
     private Mesh _earth;
+    private Mesh _stars;
 
     // Cylindrické
     private Mesh _cylindrical1;
@@ -230,6 +231,7 @@ public class App {
     private int _shadowResolution = 1024 * 10;
 
     private int _textureEarth;
+    private int _textureStars;
 
     private boolean _restart = false;
 
@@ -338,7 +340,6 @@ public class App {
 
         try {
             _shaderProgramDefault = createShaderProgram("default");
-            _shaderProgramSkybox = createShaderProgram("skybox");
 
             _shaderProgramsEarth.add(createShaderProgram("earth", "sphere", "default"));
             _shaderProgramsEarth.add(createShaderProgram("earth", "sphere", "_xyzColor"));
@@ -381,8 +382,10 @@ public class App {
         _earth = new TriangleGrid(1, 2, 5, 5, _shaderProgramsEarth);
         _earth.translate(0f, 30f, -35f);
         _earth.scale(5f, 5f, 5f);
-
+        _stars = new TriangleGrid(1, 2, 5, 5, _shaderProgramsEarth);
+        _stars.scale(50f, 50f, 50f);
         _textureEarth = loadTexture("earth.jpg");
+        _textureStars = loadTexture("stars.jpg");
 
         // glPatchParameteri(GL_PATCH_VERTICES, 4); // Quads
         glPatchParameteri(GL_PATCH_VERTICES, 3); // Triangles
@@ -407,6 +410,7 @@ public class App {
 
             // Zpracování vstupů kamery
             _camera.processInputs(_window, deltaTime);
+            _stars.setTranslation(_camera.getPosition());
 
             float earthAngle = currentFrameTime * 2;
             _earth.rotate(0.1f, 0, 1, 0);
@@ -497,7 +501,8 @@ public class App {
 
         // Vykreslení objektu
         drawMesh(_earth, _shaderProgramsEarth.get(currentShaderID), _textureEarth);
-
+        _camera.setCameraViewAndProjectionIntoShader(_shaderProgramsEarth.get(currentShaderID));
+        drawMesh(_stars, _shaderProgramsEarth.get(currentShaderID), _textureStars);
     }
 
     public int loadTexture(String filePath) {

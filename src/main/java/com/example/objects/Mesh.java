@@ -55,8 +55,8 @@ public abstract class Mesh {
         _modelMatrix.get(matrixData); // Získáme hodnoty matice jako pole
         GL20.glUniformMatrix4fv(_uniformModelMatrixLocations.get(shaderProgramID), false, matrixData);
         // wireframe
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         // glDisable(GL_CULL_FACE);
         // //glEnable(GL_CULL_FACE);
 
@@ -67,6 +67,12 @@ public abstract class Mesh {
     // translation
     public void translate(float x, float y, float z) {
         _modelMatrix.translate(x, y, z);
+    }
+
+    public void setTranslation(Vector3f translation) {
+        _modelMatrix.m30(translation.x); // nastaví prvek [3][0]
+        _modelMatrix.m31(translation.y); // nastaví prvek [3][1]
+        _modelMatrix.m32(translation.z); // nastaví prvek [3][2]
     }
 
     // rotation

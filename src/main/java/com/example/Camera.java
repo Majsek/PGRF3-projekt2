@@ -230,4 +230,9 @@ public class Camera {
         float nearPlane = -100f;
         _orthogonalProjection = new Matrix4f().ortho(left, right, bottom, top, nearPlane, farPlane);
     }
+
+    
+    public Vector3f getPosition() {
+        return _position;
+    }
 }
