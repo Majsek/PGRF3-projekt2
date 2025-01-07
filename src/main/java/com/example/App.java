@@ -408,7 +408,7 @@ public class App {
         _neptune.scale(3.88f, 3.88f, 3.88f);
 
         _stars = new TriangleGrid(1, 2, 5, 5, _shaderProgramsEarth);
-        _stars.scale(200f, 200f, 200f);
+        _stars.scale(300f, 300f, 300f);
         _textureSun = loadTexture("sun.jpg");
         _textureMercury = loadTexture("mercury.jpg");
         _textureVenus = loadTexture("venus.jpg");
@@ -579,16 +579,32 @@ public class App {
         // Nastavení kamery - předání matic do shaderu
         _camera.setCameraMatrixIntoShader(_shaderProgramsEarth.get(currentShaderID));
 
-        // Vykreslení objektu
+        glUniform1f(GL20.glGetUniformLocation(_shaderProgramsEarth.get(currentShaderID), "planetScale"), 10.0f);
         drawMesh(_sun, _shaderProgramsEarth.get(currentShaderID), _textureSun, true);
         // glUniform1i(glGetUniformLocation(currentShaderID, "isSun"), 0);
+
+        glUniform1f(GL20.glGetUniformLocation(_shaderProgramsEarth.get(currentShaderID), "planetScale"), 0.38f);
         drawMesh(_mercury, _shaderProgramsEarth.get(currentShaderID), _textureMercury);
+
+        glUniform1f(GL20.glGetUniformLocation(_shaderProgramsEarth.get(currentShaderID), "planetScale"), 0.95f);
         drawMesh(_venus, _shaderProgramsEarth.get(currentShaderID), _textureVenus);
+
+        glUniform1f(GL20.glGetUniformLocation(_shaderProgramsEarth.get(currentShaderID), "planetScale"), 1f);
         drawMesh(_earth, _shaderProgramsEarth.get(currentShaderID), _textureEarth);
+
+        glUniform1f(GL20.glGetUniformLocation(_shaderProgramsEarth.get(currentShaderID), "planetScale"), 0.53f);
         drawMesh(_mars, _shaderProgramsEarth.get(currentShaderID), _textureMars);
+
+        glUniform1f(GL20.glGetUniformLocation(_shaderProgramsEarth.get(currentShaderID), "planetScale"), 11.21f);
         drawMesh(_jupiter, _shaderProgramsEarth.get(currentShaderID), _textureJupiter);
+
+        glUniform1f(GL20.glGetUniformLocation(_shaderProgramsEarth.get(currentShaderID), "planetScale"), 9.45f);
         drawMesh(_saturn, _shaderProgramsEarth.get(currentShaderID), _textureSaturn);
+
+        glUniform1f(GL20.glGetUniformLocation(_shaderProgramsEarth.get(currentShaderID), "planetScale"), 4.08f);
         drawMesh(_uranus, _shaderProgramsEarth.get(currentShaderID), _textureUranus);
+
+        glUniform1f(GL20.glGetUniformLocation(_shaderProgramsEarth.get(currentShaderID), "planetScale"), 3.88f);
         drawMesh(_neptune, _shaderProgramsEarth.get(currentShaderID), _textureNeptune);
 
         _camera.setCameraViewAndProjectionIntoShader(_shaderProgramsEarth.get(currentShaderID));
@@ -646,7 +662,6 @@ public class App {
 
         if (isSun) {
             glUniform1i(glGetUniformLocation(shaderProgramID, "isSun"), 1);
-            System.out.println(texture);
         } else {
             glUniform1i(glGetUniformLocation(shaderProgramID, "isSun"), 0);
         }
