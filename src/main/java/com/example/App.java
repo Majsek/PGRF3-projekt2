@@ -165,6 +165,7 @@ public class App {
     private Mesh _light2;
 
     // Planets
+    private Mesh _sun;
     private Mesh _mercury;
     private Mesh _venus;
     private Mesh _earth;
@@ -211,6 +212,7 @@ public class App {
 
     private int _shadowResolution = 1024 * 10;
 
+    private int _textureSun;
     private int _textureMercury;
     private int _textureVenus;
     private int _textureEarth;
@@ -366,15 +368,18 @@ public class App {
 
         // ============================== PLANETS ==============================
 
-        float step = 65f;
         int rows = 4, cols = 4;
+        float step = 65f;
+        _sun = new TriangleGrid(1, 2, rows, cols, _shaderProgramsEarth);
+        _sun.translate(-step * 4.0f, 0f, -35f);
+        _sun.scale(10f, 10f, 10f);
 
         _mercury = new TriangleGrid(1, 2, rows, cols, _shaderProgramsEarth);
-        _mercury.translate(-step * 4f, 0f, -35f);
+        _mercury.translate(-step * 3f, 0f, -35f);
         _mercury.scale(0.38f, 0.38f, 0.38f);
-        
+
         _venus = new TriangleGrid(1, 2, rows, cols, _shaderProgramsEarth);
-        _venus.translate(-step * 3f, 0f, -35f);
+        _venus.translate(-step * 2.5f, 0f, -35f);
         _venus.scale(0.95f, 0.95f, 0.95f);
 
         _earth = new TriangleGrid(1, 2, rows, cols, _shaderProgramsEarth);
@@ -382,28 +387,28 @@ public class App {
         _earth.scale(1f, 1f, 1f);
 
         _mars = new TriangleGrid(1, 2, rows, cols, _shaderProgramsEarth);
-        _mars.translate(-step * 1f, 0f, -35f);
+        _mars.translate(-step * 1.5f, 0f, -35f);
         _mars.scale(0.53f, 0.53f, 0.53f);
 
         _jupiter = new TriangleGrid(1, 2, rows, cols, _shaderProgramsEarth);
-        _jupiter.translate(0f, 0f, -35f);
+        _jupiter.translate(-step * 0.5f, 0f, -35f);
         _jupiter.scale(11.21f, 11.21f, 11.21f);
 
         _saturn = new TriangleGrid(1, 2, rows, cols, _shaderProgramsEarth);
-        _saturn.translate(step * 1f, 0f, -35f);
+        _saturn.translate(step * 0.8f, 0f, -35f);
         _saturn.scale(9.45f, 9.45f, 9.45f);
 
         _uranus = new TriangleGrid(1, 2, rows, cols, _shaderProgramsEarth);
-        _uranus.translate(step * 2f, 0f, -35f);
+        _uranus.translate(step * 1.5f, 0f, -35f);
         _uranus.scale(4.08f, 4.08f, 4.08f);
 
         _neptune = new TriangleGrid(1, 2, rows, cols, _shaderProgramsEarth);
-        _neptune.translate(step * 3f, 0f, -35f);
+        _neptune.translate(step * 2f, 0f, -35f);
         _neptune.scale(3.88f, 3.88f, 3.88f);
-
 
         _stars = new TriangleGrid(1, 2, 5, 5, _shaderProgramsEarth);
         _stars.scale(200f, 200f, 200f);
+        _textureSun = loadTexture("sun.jpg");
         _textureMercury = loadTexture("mercury.jpg");
         _textureVenus = loadTexture("venus.jpg");
         _textureEarth = loadTexture("earth.jpg");
@@ -527,7 +532,8 @@ public class App {
         _camera.setCameraMatrixIntoShader(_shaderProgramsEarth.get(currentShaderID));
 
         // Vykreslení objektu
-        
+
+        drawMesh(_sun, _shaderProgramsEarth.get(currentShaderID), _textureSun);
         drawMesh(_mercury, _shaderProgramsEarth.get(currentShaderID), _textureMercury);
         drawMesh(_venus, _shaderProgramsEarth.get(currentShaderID), _textureVenus);
         drawMesh(_earth, _shaderProgramsEarth.get(currentShaderID), _textureEarth);
@@ -536,7 +542,6 @@ public class App {
         drawMesh(_saturn, _shaderProgramsEarth.get(currentShaderID), _textureSaturn);
         drawMesh(_uranus, _shaderProgramsEarth.get(currentShaderID), _textureUranus);
         drawMesh(_neptune, _shaderProgramsEarth.get(currentShaderID), _textureNeptune);
-
 
         _camera.setCameraViewAndProjectionIntoShader(_shaderProgramsEarth.get(currentShaderID));
         drawMesh(_stars, _shaderProgramsEarth.get(currentShaderID), _textureStars);
@@ -664,11 +669,10 @@ public class App {
 
         glUniform1i(glGetUniformLocation(shaderProgramID, "shadowMap"), 1);
 
-
         if (_drawLines) {
             mesh.draw(GL_LINE, shaderProgramID);
         } // Pro vykreslení hran
-        else{
+        else {
             mesh.draw(GL_FILL, shaderProgramID);
         } // Pro vykreslení bodů
     }
