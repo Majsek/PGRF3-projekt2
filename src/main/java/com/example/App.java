@@ -16,7 +16,6 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_E;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_F;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_G;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_I;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_KP_2;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_KP_4;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_KP_6;
@@ -26,15 +25,12 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_KP_MULTIPLY;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_M;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_N;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_O;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_P;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_PAGE_DOWN;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_PAGE_UP;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_Q;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_R;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_T;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_U;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_UP;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_X;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_Z;
@@ -81,10 +77,8 @@ import static org.lwjgl.opengl.GL11.GL_FLOAT;
 import static org.lwjgl.opengl.GL11.GL_LINE;
 import static org.lwjgl.opengl.GL11.GL_LINEAR;
 import static org.lwjgl.opengl.GL11.GL_LINEAR_MIPMAP_LINEAR;
-import static org.lwjgl.opengl.GL11.GL_LINES;
 import static org.lwjgl.opengl.GL11.GL_NEAREST;
 import static org.lwjgl.opengl.GL11.GL_NONE;
-import static org.lwjgl.opengl.GL11.GL_POINTS;
 import static org.lwjgl.opengl.GL11.GL_REPEAT;
 import static org.lwjgl.opengl.GL11.GL_RGBA;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
@@ -94,7 +88,6 @@ import static org.lwjgl.opengl.GL11.GL_TEXTURE_MIN_FILTER;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_WRAP_S;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_WRAP_T;
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
-import static org.lwjgl.opengl.GL11.GL_TRIANGLE_STRIP;
 import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
 import static org.lwjgl.opengl.GL11.glBindTexture;
 import static org.lwjgl.opengl.GL11.glClear;
@@ -229,6 +222,7 @@ public class App {
     private int _earthCols = 100;
 
     private int _levelOfTessellation = 3;
+    private boolean _useAutoLODTessellation = true;
 
     public void run() {
         init();
@@ -454,6 +448,7 @@ public class App {
             _saturn.rotate(0.1f, 0, 1, 0);
             _uranus.rotate(0.1f, 0, 1, 0);
             _neptune.rotate(0.1f, 0, 1, 0);
+            _stars.rotate(0.0005f, 1, 1, 0);
 
             // reflector light animace
             if (_rotatingLight) {
@@ -594,6 +589,7 @@ public class App {
 
         // Nastavení tessellace
         glUniform1i(glGetUniformLocation(shaderProgramID, "levelOfTessellation"), _levelOfTessellation);
+        glUniform1i(glGetUniformLocation(shaderProgramID, "useAutoLODTessellation"), _useAutoLODTessellation ? 1 : 0);
 
         // Poslání textury do shaderu
 
@@ -690,18 +686,7 @@ public class App {
                     _restart = true; // Restart aplikace
                 }
 
-                if (key == GLFW_KEY_I && action == GLFW_PRESS) {
-                    _drawTriangles = !_drawTriangles;
-                }
-                if (key == GLFW_KEY_O && action == GLFW_PRESS) {
-                    _drawLines = !_drawLines;
-                }
-                if (key == GLFW_KEY_P && action == GLFW_PRESS) {
-                    _drawPoints = !_drawPoints;
-                }
-                if (key == GLFW_KEY_U && action == GLFW_PRESS) {
-                    _drawTriangleStrips = !_drawTriangleStrips;
-                }
+                
                 if (key == GLFW_KEY_T && action == GLFW_PRESS) {
                     _useTexture = !_useTexture;
                 }
@@ -712,16 +697,10 @@ public class App {
                     _rotatingLight = !_rotatingLight;
                 }
                 if (key == GLFW_KEY_Q && action == GLFW_PRESS) {
-                    // takhle je to tady přes procesor, tohle pak musím posílat do toho Geometry
-                    // Shaderu a udělat to nějak přes něj
-                    _earthRows *= 0.5f;
-                    _earthCols *= 0.5f;
-                    remakeEarth();
+                    _levelOfTessellation -= 1;
                 }
                 if (key == GLFW_KEY_E && action == GLFW_PRESS) {
-                    _earthRows *= 2f;
-                    _earthCols *= 2f;
-                    remakeEarth();
+                    _levelOfTessellation += 1;
                 }
                 if (key == GLFW_KEY_X && action == GLFW_PRESS) {
                     changeShaderMode(+1);
@@ -730,10 +709,10 @@ public class App {
                     changeShaderMode(-1);
                 }
                 if (key == GLFW_KEY_F && action == GLFW_PRESS) {
-                    _levelOfTessellation += 1;
+                    _drawLines = !_drawLines;
                 }
                 if (key == GLFW_KEY_G && action == GLFW_PRESS) {
-                    _levelOfTessellation -= 1;
+                    _useAutoLODTessellation = !_useAutoLODTessellation;
                 } else {
                 }
                 if (key != GLFW_KEY_LEFT || action != GLFW_PRESS) {

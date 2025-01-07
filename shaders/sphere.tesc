@@ -9,6 +9,7 @@ out vec2 tessellationUV_out[];  // Posíláme dál
 out vec3 vertexColor_out[];     // Posíláme dál
 
 uniform int levelOfTessellation;   // Úroveň tessellace
+uniform bool useAutoLODTessellation;   // Úroveň tessellace
 uniform vec3 viewPos;
 uniform mat4 modelMatrix;
 
@@ -29,18 +30,22 @@ void main() {
 
     int finalLevelOfTessellation;
 
-// Pokud je objekt blíž než 1, nastaví se maximální tessellace
-    if(distance < 1.0) {
-        finalLevelOfTessellation = maxTessellationLevel;
-    } else if(distance > LODDistance) {
+    if(useAutoLODTessellation) {
+    // Pokud je objekt blíž než 1, nastaví se maximální tessellace
+        if(distance < 1.0) {
+            finalLevelOfTessellation = maxTessellationLevel;
+        } else if(distance > LODDistance) {
     // Pokud je objekt dál než LODDistance, vypočítá se úroveň tessellace na základě vzdálenosti
-        float normalizedDistance = (distance - LODDistance) / LODDistance;
-        finalLevelOfTessellation = int(maxTessellationLevel * (1.0 - normalizedDistance));
+            float normalizedDistance = (distance - LODDistance) / LODDistance;
+            finalLevelOfTessellation = int(maxTessellationLevel * (1.0 - normalizedDistance));
 
     // Popřípadě ořízne úroveń tessellace do rozsahu
-        finalLevelOfTessellation = clamp(finalLevelOfTessellation, minTessellationLevel, maxTessellationLevel);
+            finalLevelOfTessellation = clamp(finalLevelOfTessellation, minTessellationLevel, maxTessellationLevel);
+        } else {
+            finalLevelOfTessellation = maxTessellationLevel;
+        }
     } else {
-        finalLevelOfTessellation = maxTessellationLevel;
+        finalLevelOfTessellation = levelOfTessellation;
     }
 
     // Každému vrcholu předá jeho pozici a atributy
