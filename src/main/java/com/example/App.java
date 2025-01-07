@@ -20,8 +20,10 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_KP_2;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_KP_4;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_KP_6;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_KP_8;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_KP_ADD;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_KP_DIVIDE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_KP_MULTIPLY;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_KP_SUBTRACT;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_M;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_N;
@@ -224,6 +226,8 @@ public class App {
     private int _levelOfTessellation = 3;
     private boolean _useAutoLODTessellation = true;
 
+    float _baseSpeed = 1f; // Základní rychlost simulace (1 = reálná rychlost)
+
     public void run() {
         init();
         loop();
@@ -351,13 +355,12 @@ public class App {
                     "lightPos"));
         }
 
-        _shaderModeMax = _shaderProgramsEarth.size() - 1;
+        _shaderModeMax = _shaderProgramsEarth.size() - 3;
 
         // ============================== OBJEKTY ==============================
 
-        
         // ============================== PLANETS ==============================
-        
+
         int rows = 4, cols = 4;
         float step = 65f;
         _light = new Cube(10f, new ArrayList<>(List.of(_shaderProgramDefault)));
@@ -367,11 +370,10 @@ public class App {
         _light2 = new Cube(10f, new ArrayList<>(List.of(_shaderProgramDefault)));
         _light2.translate(-step * 4.0f, 0f, -35f);
         _light2.rotate(10f, 0f, 1f, 0f);
-        
+
         _sun = new TriangleGrid(1, 2, rows, cols, _shaderProgramsEarth);
         _sun.translate(-step * 4.0f, 0f, -35f);
         _sun.scale(10f, 10f, 10f);
-
 
         _mercury = new TriangleGrid(1, 2, rows, cols, _shaderProgramsEarth);
         _mercury.translate(-step * 3f, 0f, -35f);
@@ -445,21 +447,62 @@ public class App {
             _stars.setTranslation(_camera.getPosition());
 
             // animace slunce
-            float pulse = 1f + 0.02f * org.joml.Math.sin(currentFrameTime)/3f;
+            float pulse = 1f + 0.02f * org.joml.Math.sin(currentFrameTime) / 3f;
             _sun.setScale(10 * pulse, 10f * pulse, 10f * pulse);
-            
-            
-            _mercury.rotate(0.1f, 0, 1, 0);
-            _mercury.rotate(0.1f, 0, 1, 0);
-            _venus.rotate(0.1f, 0, 1, 0);
-            _earth.rotate(0.1f, 0, 1, 0);
-            _mars.rotate(0.1f, 0, 1, 0);
-            _jupiter.rotate(0.1f, 0, 1, 0);
-            _saturn.rotate(0.1f, 0, 1, 0);
-            _uranus.rotate(0.1f, 0, 1, 0);
-            _neptune.rotate(0.1f, 0, 1, 0);
-            _stars.rotate(0.0005f, 1, 1, 0);
 
+            // Parametry orbitálních period (v dnech)
+            float mercuryOrbitDays = 88f;
+            float venusOrbitDays = 224.7f;
+            float earthOrbitDays = 365.25f;
+            float marsOrbitDays = 687f;
+            float jupiterOrbitDays = 4331f;
+            float saturnOrbitDays = 10747f;
+            float uranusOrbitDays = 30589f;
+            float neptuneOrbitDays = 59800f;
+
+            // Parametry rotačních period (v hodinách)
+            float mercuryRotationHours = 1407.5f;
+            float venusRotationHours = -5832.5f; // Retrográdní
+            float earthRotationHours = 24f;
+            float marsRotationHours = 24.6f;
+            float jupiterRotationHours = 9.9f;
+            float saturnRotationHours = 10.7f;
+            float uranusRotationHours = -17.2f; // Retrográdní
+            float neptuneRotationHours = 16.1f;
+
+            // Přepočet na rychlost orbitální a rotační rotace (závisí na baseSpeed)
+            _mercury.rotate(deltaTime * _baseSpeed * (360f / (mercuryRotationHours / 24f)), 0, 1, 0);
+            _venus.rotate(deltaTime * _baseSpeed * (360f / (venusRotationHours / 24f)), 0, 1, 0);
+            _earth.rotate(deltaTime * _baseSpeed * (360f / (earthRotationHours / 24f)), 0, 1, 0);
+            _mars.rotate(deltaTime * _baseSpeed * (360f / (marsRotationHours / 24f)), 0, 1, 0);
+            _jupiter.rotate(deltaTime * _baseSpeed * (360f / (jupiterRotationHours / 24f)), 0, 1, 0);
+            _saturn.rotate(deltaTime * _baseSpeed * (360f / (saturnRotationHours / 24f)), 0, 1, 0);
+            _uranus.rotate(deltaTime * _baseSpeed * (360f / (uranusRotationHours / 24f)), 0, 1, 0);
+            _neptune.rotate(deltaTime * _baseSpeed * (360f / (neptuneRotationHours / 24f)), 0, 1, 0);
+
+            // Parametry rotace kolem Slunce
+            Vector3f sunPosition = new Vector3f(-65.0f * 4.0f, 0f, -35f); // Pozice Slunce
+            Vector3f rotationAxis = new Vector3f(0f, 1f, 0f); // Rotace kolem osy Y
+            float earthOrbitSpeed = 360f / earthOrbitDays; // Rotace Země kolem Slunce
+
+            _mercury.rotateAround(sunPosition, rotationAxis,
+                    _baseSpeed * earthOrbitSpeed * (earthOrbitDays / mercuryOrbitDays), deltaTime);
+            _venus.rotateAround(sunPosition, rotationAxis,
+                    _baseSpeed * earthOrbitSpeed * (earthOrbitDays / venusOrbitDays), deltaTime);
+            _earth.rotateAround(sunPosition, rotationAxis, _baseSpeed * earthOrbitSpeed, deltaTime);
+            _mars.rotateAround(sunPosition, rotationAxis,
+                    _baseSpeed * earthOrbitSpeed * (earthOrbitDays / marsOrbitDays), deltaTime);
+            _jupiter.rotateAround(sunPosition, rotationAxis,
+                    _baseSpeed * earthOrbitSpeed * (earthOrbitDays / jupiterOrbitDays), deltaTime);
+            _saturn.rotateAround(sunPosition, rotationAxis,
+                    _baseSpeed * earthOrbitSpeed * (earthOrbitDays / saturnOrbitDays), deltaTime);
+            _uranus.rotateAround(sunPosition, rotationAxis,
+                    _baseSpeed * earthOrbitSpeed * (earthOrbitDays / uranusOrbitDays), deltaTime);
+            _neptune.rotateAround(sunPosition, rotationAxis,
+                    _baseSpeed * earthOrbitSpeed * (earthOrbitDays / neptuneOrbitDays), deltaTime);
+
+            _stars.rotate(0.0005f, 1, 1, 0);
+            //
             // reflector light animace
             if (_rotatingLight) {
                 float oscillation = (float) Math.sin(currentFrameTime) * 0.4f; // jak moc se bude točit
@@ -591,7 +634,6 @@ public class App {
         return textureID;
     }
 
-    
     private void drawMesh(Mesh mesh, int shaderProgramID, int texture, boolean isSun) {
         drawMesh(mesh, shaderProgramID, texture, false, isSun);
     }
@@ -728,7 +770,7 @@ public class App {
                 }
                 if (key == GLFW_KEY_X && action == GLFW_PRESS) {
                     changeShaderMode(+1);
-                        
+
                 }
                 if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
                     changeShaderMode(-1);
@@ -783,6 +825,12 @@ public class App {
                 }
                 if (key == GLFW_KEY_KP_MULTIPLY && action == GLFW_PRESS) {
                     _cutOff -= 0.1;
+                }
+                if (key == GLFW_KEY_KP_ADD && action == GLFW_PRESS) {
+                    _baseSpeed *= 2;
+                }
+                if (key == GLFW_KEY_KP_SUBTRACT && action == GLFW_PRESS) {
+                    _baseSpeed /= 2;
                 }
             }
         });

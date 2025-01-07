@@ -110,4 +110,18 @@ public abstract class Mesh {
 
         return new Vector3f(x, y, z);
     }
+
+    public void rotateAround(Vector3f center, Vector3f axis, float speed, float deltaTime) {
+        // Vypočítáme úhel rotace za aktuální snímek
+        float angle = deltaTime * speed;
+    
+        Matrix4f rotationMatrix = new Matrix4f()
+            .translate(center) // Překlad do středu rotace
+            .rotate((float) Math.toRadians(angle), axis) // Rotace kolem osy
+            .translate(new Vector3f(center).negate()); // Překlad zpět
+    
+        // Kombinujeme výslednou rotaci s existující modelovou maticí
+        _modelMatrix = rotationMatrix.mul(_modelMatrix);
+    }
+
 }
