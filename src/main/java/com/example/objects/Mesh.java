@@ -84,6 +84,12 @@ public abstract class Mesh {
         _modelMatrix.scale(x, y, z);
     }
 
+    public void setScale(float x, float y, float z) {
+        _modelMatrix.m00(x); // nastaví prvek [0][0]
+        _modelMatrix.m11(y); // nastaví prvek [1][1]
+        _modelMatrix.m22(z); // nastaví prvek [2][2]
+    }
+
     public void cleanup() {
         _vbo.delete();
         _ibo.delete();

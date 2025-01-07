@@ -439,7 +439,12 @@ public class App {
             _camera.processInputs(_window, deltaTime);
             _stars.setTranslation(_camera.getPosition());
 
-            float earthAngle = currentFrameTime * 2;
+            // animace slunce
+            float pulse = 1f + 0.02f * org.joml.Math.sin(currentFrameTime)/3f;
+            _sun.setScale(10 * pulse, 10f * pulse, 10f * pulse);
+            
+            
+            _mercury.rotate(0.1f, 0, 1, 0);
             _mercury.rotate(0.1f, 0, 1, 0);
             _venus.rotate(0.1f, 0, 1, 0);
             _earth.rotate(0.1f, 0, 1, 0);
@@ -686,7 +691,6 @@ public class App {
                     _restart = true; // Restart aplikace
                 }
 
-                
                 if (key == GLFW_KEY_T && action == GLFW_PRESS) {
                     _useTexture = !_useTexture;
                 }
@@ -697,6 +701,9 @@ public class App {
                     _rotatingLight = !_rotatingLight;
                 }
                 if (key == GLFW_KEY_Q && action == GLFW_PRESS) {
+                    if (_levelOfTessellation == 1) {
+                        return;
+                    }
                     _levelOfTessellation -= 1;
                 }
                 if (key == GLFW_KEY_E && action == GLFW_PRESS) {
