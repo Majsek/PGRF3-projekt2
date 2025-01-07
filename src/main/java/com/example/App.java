@@ -343,7 +343,6 @@ public class App {
         _timeDefaultUniformLocation = glGetUniformLocation(_shaderProgramDefault, "time");
         _timeSkyboxUniformLocation = glGetUniformLocation(_shaderProgramSkybox, "time");
 
-        _shaderModeMax = _shaderProgramsEarth.size() - 1;
         for (int i = 0; i < _shaderProgramsEarth.size(); i++) {
 
             _timeEarthUniformLocations
@@ -356,17 +355,23 @@ public class App {
 
         // ============================== OBJEKTY ==============================
 
-        _light = new Cube(10f, new ArrayList<>(List.of(_shaderProgramDefault)));
-        _light.translate(-10f, 200f, 100f);
-        _light.rotate(10f, 0f, 1f, 0f);
-
+        
         // ============================== PLANETS ==============================
-
+        
         int rows = 4, cols = 4;
         float step = 65f;
+        _light = new Cube(10f, new ArrayList<>(List.of(_shaderProgramDefault)));
+        _light.translate(-step * 4.0f, 0f, -35f);
+        _light.rotate(10f, 0f, 1f, 0f);
+
+        _light2 = new Cube(10f, new ArrayList<>(List.of(_shaderProgramDefault)));
+        _light2.translate(-step * 4.0f, 0f, -35f);
+        _light2.rotate(10f, 0f, 1f, 0f);
+        
         _sun = new TriangleGrid(1, 2, rows, cols, _shaderProgramsEarth);
         _sun.translate(-step * 4.0f, 0f, -35f);
         _sun.scale(10f, 10f, 10f);
+
 
         _mercury = new TriangleGrid(1, 2, rows, cols, _shaderProgramsEarth);
         _mercury.translate(-step * 3f, 0f, -35f);
@@ -532,8 +537,8 @@ public class App {
         _camera.setCameraMatrixIntoShader(_shaderProgramsEarth.get(currentShaderID));
 
         // Vykreslení objektu
-
-        drawMesh(_sun, _shaderProgramsEarth.get(currentShaderID), _textureSun);
+        drawMesh(_sun, _shaderProgramsEarth.get(currentShaderID), _textureSun, true);
+        // glUniform1i(glGetUniformLocation(currentShaderID, "isSun"), 0);
         drawMesh(_mercury, _shaderProgramsEarth.get(currentShaderID), _textureMercury);
         drawMesh(_venus, _shaderProgramsEarth.get(currentShaderID), _textureVenus);
         drawMesh(_earth, _shaderProgramsEarth.get(currentShaderID), _textureEarth);
@@ -544,7 +549,7 @@ public class App {
         drawMesh(_neptune, _shaderProgramsEarth.get(currentShaderID), _textureNeptune);
 
         _camera.setCameraViewAndProjectionIntoShader(_shaderProgramsEarth.get(currentShaderID));
-        drawMesh(_stars, _shaderProgramsEarth.get(currentShaderID), _textureStars);
+        drawMesh(_stars, _shaderProgramsEarth.get(currentShaderID), _textureStars, true);
     }
 
     public int loadTexture(String filePath) {
@@ -586,11 +591,23 @@ public class App {
         return textureID;
     }
 
-    private void drawMesh(Mesh mesh, int shaderProgramID, int texture) {
-        drawMesh(mesh, shaderProgramID, texture, false);
+    
+    private void drawMesh(Mesh mesh, int shaderProgramID, int texture, boolean isSun) {
+        drawMesh(mesh, shaderProgramID, texture, false, isSun);
     }
 
-    private void drawMesh(Mesh mesh, int shaderProgramID, int texture, boolean triangleStrip) {
+    private void drawMesh(Mesh mesh, int shaderProgramID, int texture) {
+        drawMesh(mesh, shaderProgramID, texture, false, false);
+    }
+
+    private void drawMesh(Mesh mesh, int shaderProgramID, int texture, boolean triangleStrip, boolean isSun) {
+
+        if (isSun) {
+            glUniform1i(glGetUniformLocation(shaderProgramID, "isSun"), 1);
+            System.out.println(texture);
+        } else {
+            glUniform1i(glGetUniformLocation(shaderProgramID, "isSun"), 0);
+        }
 
         // Nastavení tessellace
         glUniform1i(glGetUniformLocation(shaderProgramID, "levelOfTessellation"), _levelOfTessellation);
@@ -711,6 +728,7 @@ public class App {
                 }
                 if (key == GLFW_KEY_X && action == GLFW_PRESS) {
                     changeShaderMode(+1);
+                        
                 }
                 if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
                     changeShaderMode(-1);
