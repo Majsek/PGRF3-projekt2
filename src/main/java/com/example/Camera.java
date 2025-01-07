@@ -29,7 +29,7 @@ public class Camera {
     private Vector3f _orientation;
     private Vector3f _up;
 
-    private float _speed = 5.0f;
+    private float _speed = 30.0f;
     private float _sensitivity = 0.5f;
 
     private boolean _clickedIn = false;
@@ -146,9 +146,9 @@ public class Camera {
 
         // Zrychlení pohybu (levý Shift)
         if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-            _speed = 15.0f;
+            _speed = 50.0f;
         } else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE) {
-            _speed = 5.0f;
+            _speed = 15.0f;
         }
 
         // Přepnutí orthogonální projekce
