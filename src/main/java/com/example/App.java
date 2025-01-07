@@ -76,7 +76,9 @@ import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_COMPONENT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
 import static org.lwjgl.opengl.GL11.GL_FALSE;
+import static org.lwjgl.opengl.GL11.GL_FILL;
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
+import static org.lwjgl.opengl.GL11.GL_LINE;
 import static org.lwjgl.opengl.GL11.GL_LINEAR;
 import static org.lwjgl.opengl.GL11.GL_LINEAR_MIPMAP_LINEAR;
 import static org.lwjgl.opengl.GL11.GL_LINES;
@@ -364,7 +366,7 @@ public class App {
 
         // ============================== PLANETS ==============================
 
-        float step = 50f;
+        float step = 65f;
         int rows = 4, cols = 4;
 
         _mercury = new TriangleGrid(1, 2, rows, cols, _shaderProgramsEarth);
@@ -662,25 +664,12 @@ public class App {
 
         glUniform1i(glGetUniformLocation(shaderProgramID, "shadowMap"), 1);
 
-        if (triangleStrip && (_shaderMode > 1)) {
-            return;
-        }
-
-        if (triangleStrip && _drawTriangleStrips) {
-            // if (_drawTriangleStrips) {
-            mesh.draw(GL_TRIANGLE_STRIP, shaderProgramID);
-            // }
-        } else {
-            if (_drawTriangles) {
-                mesh.draw(GL_TRIANGLES, shaderProgramID);
-            } // Pro plné trojúhelníky
-        }
 
         if (_drawLines) {
-            mesh.draw(GL_LINES, shaderProgramID);
+            mesh.draw(GL_LINE, shaderProgramID);
         } // Pro vykreslení hran
-        if (_drawPoints) {
-            mesh.draw(GL_POINTS, shaderProgramID);
+        else{
+            mesh.draw(GL_FILL, shaderProgramID);
         } // Pro vykreslení bodů
     }
 
