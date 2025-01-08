@@ -334,9 +334,6 @@ public class App {
             _shaderProgramsEarth.add(createShaderProgram("earth", "sphere", "_normalView"));
             _shaderProgramsEarth.add(createShaderProgram("earth", "sphere", "_depthView"));
             _shaderProgramsEarth.add(createShaderProgram("earth", "sphere", "_orthoLight"));
-            _shaderProgramsEarth.add(createShaderProgram("earth", "sphere", "_pointLight"));
-            _shaderProgramsEarth.add(createShaderProgram("earth", "sphere", "_reflectorLight"));
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -355,7 +352,7 @@ public class App {
                     "lightPos"));
         }
 
-        _shaderModeMax = _shaderProgramsEarth.size() - 3;
+        _shaderModeMax = _shaderProgramsEarth.size() - 1;
 
         // ============================== OBJEKTY ==============================
 
