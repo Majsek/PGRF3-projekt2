@@ -193,7 +193,6 @@ public class App {
 
     // skybox
     private int _timeSkyboxUniformLocation;
-    private ArrayList<Integer> _lightPosFloorUniformLocations = new ArrayList<>();
 
     private int _shaderMode = 0;
     private int _shaderModeMax;
@@ -329,11 +328,11 @@ public class App {
         try {
             _shaderProgramDefault = createShaderProgram("default");
 
+            _shaderProgramsEarth.add(createShaderProgram("earth", "sphere", "_orthoLight"));
             _shaderProgramsEarth.add(createShaderProgram("earth", "sphere", "default"));
             _shaderProgramsEarth.add(createShaderProgram("earth", "sphere", "_xyzColor"));
             _shaderProgramsEarth.add(createShaderProgram("earth", "sphere", "_normalView"));
             _shaderProgramsEarth.add(createShaderProgram("earth", "sphere", "_depthView"));
-            _shaderProgramsEarth.add(createShaderProgram("earth", "sphere", "_orthoLight"));
         } catch (IOException e) {
             e.printStackTrace();
         }
