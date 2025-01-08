@@ -388,17 +388,17 @@ public class App {
 
         _stars = new TriangleGrid(1, 2, 5, 5, _shaderProgramsEarth);
         _stars.scale(300f, 300f, 300f);
-        _textureSun = loadTexture("sun.jpg");
-        _textureMercury = loadTexture("mercury.jpg");
-        _textureVenus = loadTexture("venus.jpg");
-        _textureEarth = loadTexture("earth.jpg");
-        _textureMars = loadTexture("mars.jpg");
-        _textureJupiter = loadTexture("jupiter.jpg");
-        _textureSaturn = loadTexture("saturn.jpg");
-        _textureUranus = loadTexture("uranus.jpg");
-        _textureNeptune = loadTexture("neptune.jpg");
+        _textureSun = loadTexture("textures/sun.jpg");
+        _textureMercury = loadTexture("textures/mercury.jpg");
+        _textureVenus = loadTexture("textures/venus.jpg");
+        _textureEarth = loadTexture("textures/earth.jpg");
+        _textureMars = loadTexture("textures/mars.jpg");
+        _textureJupiter = loadTexture("textures/jupiter.jpg");
+        _textureSaturn = loadTexture("textures/saturn.jpg");
+        _textureUranus = loadTexture("textures/uranus.jpg");
+        _textureNeptune = loadTexture("textures/neptune.jpg");
 
-        _textureStars = loadTexture("stars.jpg");
+        _textureStars = loadTexture("textures/stars.jpg");
 
         // glPatchParameteri(GL_PATCH_VERTICES, 4); // Quads
         glPatchParameteri(GL_PATCH_VERTICES, 3); // Triangles
@@ -773,7 +773,7 @@ public class App {
                 }
                 if (key == GLFW_KEY_F && action == GLFW_PRESS) {
                     _drawLines = !_drawLines;
-                    glfwSetWindowTitle(_window, "Patches draw mode: " +( _drawLines ? "LINES" : "FILL") + " (use F to switch)");
+                    glfwSetWindowTitle(_window, "Polygon draw mode: " +( _drawLines ? "LINES" : "FILL") + " (use F to switch)");
                 }
                 if (key == GLFW_KEY_G && action == GLFW_PRESS) {
                     _useAutoLODTessellation = !_useAutoLODTessellation;

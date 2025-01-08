@@ -17,3 +17,5 @@ buildNumber.properties
 .classpath
 .vscode/settings.json
 hs_err_pid*.log
+
+projekt1-1.0-SNAPSHOT.jar
