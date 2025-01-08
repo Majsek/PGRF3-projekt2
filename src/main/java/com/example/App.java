@@ -746,35 +746,47 @@ public class App {
 
                 if (key == GLFW_KEY_T && action == GLFW_PRESS) {
                     _useTexture = !_useTexture;
+                    glfwSetWindowTitle(_window, "Textures: " + ( _useTexture ? "ON" : "OFF") + "(use T to switch)");
                 }
                 if (key == GLFW_KEY_Q && action == GLFW_PRESS) {
+                    if (_useAutoLODTessellation){
+                        return;
+                    }
                     if (_levelOfTessellation == 1) {
                         return;
                     }
                     _levelOfTessellation -= 1;
+                    glfwSetWindowTitle(_window, "Level of tessellation: " + _levelOfTessellation + " (use Q or E keys to adjust level of tessellation)");
                 }
                 if (key == GLFW_KEY_E && action == GLFW_PRESS) {
+                    if (_useAutoLODTessellation){
+                        return;
+                    }
                     _levelOfTessellation += 1;
+                    glfwSetWindowTitle(_window, "Level of tessellation: " + _levelOfTessellation + " (use Q or E keys to adjust level of tessellation)");
                 }
                 if (key == GLFW_KEY_X && action == GLFW_PRESS) {
                     changeShaderMode(+1);
-
                 }
                 if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
                     changeShaderMode(-1);
                 }
                 if (key == GLFW_KEY_F && action == GLFW_PRESS) {
                     _drawLines = !_drawLines;
+                    glfwSetWindowTitle(_window, "Patches draw mode: " +( _drawLines ? "LINES" : "FILL") + " (use F to switch)");
                 }
                 if (key == GLFW_KEY_G && action == GLFW_PRESS) {
                     _useAutoLODTessellation = !_useAutoLODTessellation;
+                    glfwSetWindowTitle(_window, "Auto LOD Tessellation: " + (_useAutoLODTessellation ? "ON" : "OFF") + " (use G to switch), (use Q or E keys to adjust level of tessellation)");
                 } else {
                 }
                 if (key == GLFW_KEY_KP_ADD && action == GLFW_PRESS) {
                     _baseSpeed *= 2;
+                    glfwSetWindowTitle(_window, "Simulation speed: " + _baseSpeed + " (use + or - adjust speed)");
                 }
                 if (key == GLFW_KEY_KP_SUBTRACT && action == GLFW_PRESS) {
                     _baseSpeed /= 2;
+                    glfwSetWindowTitle(_window, "Simulation speed: " + _baseSpeed + " (use + or - adjust speed)");
                 }
             }
         });
@@ -786,7 +798,29 @@ public class App {
             return;
         }
         _shaderMode += how;
-        glfwSetWindowTitle(_window, "Shader mode: " + _shaderMode);
+        String shaderMode;
+        switch (_shaderMode) {
+            case 0:
+                shaderMode = "Light";
+                break;
+            case 1:
+                shaderMode = "Default";
+                break;
+            case 2:
+                shaderMode = "xyzColor";
+                break;
+            case 3:
+                shaderMode = "normalView";
+                break;
+            case 4:
+                shaderMode = "depthView";
+                break;
+            default:
+                shaderMode = "error";
+                break;
+        }
+
+        glfwSetWindowTitle(_window, "Shader mode: " + shaderMode + " (use X and Z keys to change mode)");
     }
 
     // Vytvoří a vrátí shader program z shader souborů
