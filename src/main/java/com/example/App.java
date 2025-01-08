@@ -11,29 +11,15 @@ import java.util.List;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_E;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_F;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_G;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_KP_2;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_KP_4;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_KP_6;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_KP_8;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_KP_ADD;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_KP_DIVIDE;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_KP_MULTIPLY;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_KP_SUBTRACT;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_M;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_N;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_PAGE_DOWN;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_PAGE_UP;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_Q;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_R;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_T;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_UP;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_X;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_Z;
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
@@ -219,13 +205,10 @@ public class App {
 
     private boolean _restart = false;
 
-    private int _earthRows = 100;
-    private int _earthCols = 100;
-
     private int _levelOfTessellation = 3;
     private boolean _useAutoLODTessellation = true;
 
-    float _baseSpeed = 1f; // Základní rychlost simulace (1 = reálná rychlost)
+    float _baseSpeed = 0.01f; // Základní rychlost simulace (1 = reálná rychlost)
 
     public void run() {
         init();
@@ -265,7 +248,7 @@ public class App {
 
         // Vytvoření okna
         _window = glfwCreateWindow(_windowWidth, _windowHeight,
-                "PGRF3 - LWJGL projekt1 - Minařík Matěj - minarma1@uhk.cz", NULL, NULL);
+                "PGRF3 - LWJGL projekt2 - teselace - Minařík Matěj - minarma1@uhk.cz", NULL, NULL);
         if (_window == NULL) {
             throw new IllegalStateException("Nelze vytvořit okno");
         }
@@ -285,7 +268,7 @@ public class App {
 
         // Inicializace kamery
         _camera = new Camera(
-                new Vector3f(0.0f, 0.0f, 3.0f), // pozice kamery
+                new Vector3f(-130.0f, 0.0f, -30.0f), // pozice kamery
                 new Vector3f(0.0f, 0.0f, -1.0f), // směr kamery
                 new Vector3f(0.0f, 1.0f, 0.0f), // up vektor
                 1400, 900 // rozměry okna
@@ -764,12 +747,6 @@ public class App {
                 if (key == GLFW_KEY_T && action == GLFW_PRESS) {
                     _useTexture = !_useTexture;
                 }
-                if (key == GLFW_KEY_M && action == GLFW_PRESS) {
-                    _movingLight = !_movingLight;
-                }
-                if (key == GLFW_KEY_N && action == GLFW_PRESS) {
-                    _rotatingLight = !_rotatingLight;
-                }
                 if (key == GLFW_KEY_Q && action == GLFW_PRESS) {
                     if (_levelOfTessellation == 1) {
                         return;
@@ -793,50 +770,6 @@ public class App {
                     _useAutoLODTessellation = !_useAutoLODTessellation;
                 } else {
                 }
-                if (key != GLFW_KEY_LEFT || action != GLFW_PRESS) {
-                } else {
-                    _light.translate(-5, 0, 0);
-                    _light2.translate(-5, 0, 0);
-                }
-                if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) {
-                    _light.translate(5, 0, 0);
-                    _light2.translate(5, 0, 0);
-                }
-                if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
-                    _light.translate(0, 0, -5);
-                    _light2.translate(0, 0, -5);
-                }
-                if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
-                    _light.translate(0, 0, 5);
-                    _light2.translate(0, 0, 5);
-                }
-                if (key == GLFW_KEY_PAGE_UP && action == GLFW_PRESS) {
-                    _light.translate(0, 1, 0);
-                    _light2.translate(0, 1, 0);
-                }
-                if (key == GLFW_KEY_PAGE_DOWN && action == GLFW_PRESS) {
-                    _light.translate(0, -1, 0);
-                    _light2.translate(0, -1, 0);
-                }
-                if (key == GLFW_KEY_KP_8 && action == GLFW_PRESS) {
-                    _light2.rotate(10, 0, 0, 1);
-                }
-                if (key == GLFW_KEY_KP_2 && action == GLFW_PRESS) {
-                    _light2.rotate(-10, 0, 0, 1);
-                }
-                if (key == GLFW_KEY_KP_6 && action == GLFW_PRESS) {
-                    _light2.rotate(10, 1, 0, 1);
-                }
-                if (key == GLFW_KEY_KP_4 && action == GLFW_PRESS) {
-                    _light2.rotate(-10, 1, 0, 1);
-                }
-                if (key != GLFW_KEY_KP_DIVIDE || action != GLFW_PRESS) {
-                } else {
-                    _cutOff += 0.1;
-                }
-                if (key == GLFW_KEY_KP_MULTIPLY && action == GLFW_PRESS) {
-                    _cutOff -= 0.1;
-                }
                 if (key == GLFW_KEY_KP_ADD && action == GLFW_PRESS) {
                     _baseSpeed *= 2;
                 }
@@ -845,12 +778,6 @@ public class App {
                 }
             }
         });
-    }
-
-    private void remakeEarth() {
-        _earth = new TriangleGrid(1, 2, _earthRows, _earthCols, _shaderProgramsEarth);
-        _earth.translate(0f, 30f, -35f);
-        _earth.scale(5f, 5f, 5f);
     }
 
     private void changeShaderMode(int how) {
